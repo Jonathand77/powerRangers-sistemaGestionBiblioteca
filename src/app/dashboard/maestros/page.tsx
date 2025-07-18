@@ -1,21 +1,13 @@
+// app/maestros/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import AddMasterClient from "../maestros/AddMasterClient";
 
 const shortId = (id: string) => id.substring(0, 8);
 
-// ✅ Tipo para el resultado de Supabase
-type Maestro = {
-  id: string;
-  nombre: string;
-  saldo: number;
-  creadoPor?: { email: string }[];
-};
-
 export default async function MaestrosPage() {
   const supabase = await createClient();
 
-  // Autenticación
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -23,14 +15,12 @@ export default async function MaestrosPage() {
     redirect("/login");
   }
 
-  // Rol del usuario
   const { data: userData } = await supabase
     .from("User")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  // Obtener maestros
   const { data: maestros, error } = await supabase.from("Maestro").select(`
     id,
     nombre,
@@ -55,6 +45,7 @@ export default async function MaestrosPage() {
       {/* Tabla de Maestros */}
       <div className="bg-white shadow-xl rounded-2xl overflow-hidden transition-shadow duration-300 hover:shadow-2xl">
         <table className="min-w-full leading-normal">
+          {/* Encabezados */}
           <thead className="bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 uppercase text-sm font-bold tracking-wider">
             <tr>
               <th className="px-6 py-4 text-left">ID</th>
@@ -64,8 +55,9 @@ export default async function MaestrosPage() {
             </tr>
           </thead>
 
+          {/* Cuerpo */}
           <tbody>
-            {(maestros as Maestro[])?.map((maestro) => (
+            {maestros?.map((maestro: any) => (
               <tr
                 key={maestro.id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition-all duration-200"
@@ -92,4 +84,3 @@ export default async function MaestrosPage() {
     </div>
   );
 }
-
